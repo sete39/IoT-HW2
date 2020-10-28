@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <style>
+            html {
+                height: 100%;
+                width: 100%;
+            }
+            body {
+                height: 100%;
+                width: 100%;
+            }
+            .blackCircle {
+                display: flex;
+                height: 70%;
+                width: 70vh;
+                border-radius: 50%;
+                background-color: black;
+                text-align: center;
+            }
+            .center {
+                margin: auto;
+            }
+            .compass {
+                font-size: 300;
+                transform: rotate(0deg);
+                color: grey;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            window.onload = function() {
+                function calculateAngle(current, destination) {
+                    // [0] is latitude, [1] is longitude
+                    // θ = atan2(sin(Δlong)*cos(lat2), cos(lat1)*sin(lat2) − sin(lat1)*cos(lat2)*cos(Δlong))
+                    // equation from https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+
+                    const diffLng = destination[1] - current[1];
+                    const t1 = Math.sin(diffLng) * Math.cos(destination[0]);
+                    const t2 = Math.cos(current[0]) * Math.sin(destination[0]);
+                    const t3 = Math.sin(current[0]) * Math.cos(destination[0]) * Math.cos(diffLng);
+                    const angleRadians = Math.atan2(t1, (t2 - t3));
+                    console.log(t2)
+                    return (angleRadians * 180 / Math.PI); // 
+                }
+                updateLocation();
+                var setLocationInterval = window.setInterval(updateLocation, 2000); // updates location every 2 seconds
+                
+                function updateLocation() {
+                    //if (current != undefined && destination != undefined)
+                    $.ajax({
+                        type: "GET",
+                        url: "/locations",
+                    }).done(function(response) {
+                        console.log("success");
+                        console.log(response);
+                        if (response != '{}') {
+                            $('.compass').css('color', 'white');
+                            const parsedResp = $.parseJSON(response);
+                            const current = [parseFloat(parsedResp.currentLat), parseFloat(parsedResp.currentLng)];
+                            const destination = [parseFloat(parsedResp.destLat), parseFloat(parsedResp.destLng)];
+                            angle = calculateAngle(current, destination);
+                            console.log(current);
+                            console.log(destination);
+                            console.log(angle);
+                            $('.compass').css('transform', 'rotate(' + (angle-90) + 'deg)'); // angle - 90 to make it point up when angle=0
+                        }
+                    });
+                }
+            }
+        </script>
+        <link rel="icon" href="data:,">
+    </head>
+    <body>
+        <div class="blackCircle center">
+            <div class="center compass">
+                >
+            </div>
+        </div>
+    </body>
+</html>

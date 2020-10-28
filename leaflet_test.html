@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+        <script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-map.js?key=IudPx1KhI7KYBiGbISQbTLJpGkv7AOn8"></script>
+        <script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-routing.js?key=IudPx1KhI7KYBiGbISQbTLJpGkv7AOn8"></script>
+
+        <script type="text/javascript">
+            window.onload = function() {
+                // var getLocation = window.navigator.geolocation.getCurrentPosition(changeView(position), (error) =>{console.log(error)})
+                var map;
+                var dir;
+                var currentLocation;
+                var mouseClickLocation;
+                var marker, currentLocationMarker, isMarked;
+                map = L.map('map', { // initialize map, with Dubai set displayed on map if no user location available
+                    layers: MQ.mapLayer(),
+                    center: [25.196099, 55.281245], // [longtitude, latitude] of Dubai
+                    zoom: 12,
+                });
+
+                dir = MQ.routing.directions();
+                var routeLayer = MQ.routing.routeLayer({
+                    directions: dir,
+                    fitBounds: true
+                })
+                map.addLayer(routeLayer);
+            
+                map.locate({setView: true, watch: true}).on('locationfound', function(e) {
+                    currentLocation = [e.latitude, e.longitude];
+                    if (mouseClickLocation == undefined)
+                        mouseClickLocation = [(currentLocation[0] + 0.00005), currentLocation[1]];
+                    dir.route({ // add beginning and end markers on the map
+                        locations: [
+                            currentLocation[0] + ',' + currentLocation[1],
+                            mouseClickLocation[0] + ',' + mouseClickLocation[1],
+                        ]
+                    });
+                    sendLocation()
+                });
+                
+                map.on('click', function(e) {
+                    if (isMarked) { // reset markers on click and when already clicked
+                        map.removeLayer(routeLayer);
+                        dir = MQ.routing.directions();
+                        routeLayer = MQ.routing.routeLayer({
+                            directions: dir,
+                            fitBounds: true
+                        })
+                        map.addLayer(routeLayer);
+                    }
+                    mouseClickLocation =  [e.latlng.lat, e.latlng.lng];
+                    isMarked = true;
+                    dir.route({
+                        locations: [
+                            currentLocation[0] + ',' + currentLocation[1],
+                            mouseClickLocation[0] + ',' + mouseClickLocation[1]
+                        ]
+                    });
+                    sendLocation();
+                });
+
+                var setLocationInterval = window.setInterval(sendLocation, 5000);
+
+                function sendLocation() {
+                    console.log('sending location');
+                    if (mouseClickLocation != undefined) {
+                        var locationData = {
+                            currentLat: currentLocation[0],
+                            currentLng: currentLocation[1],
+                            destLat: mouseClickLocation[0],
+                            destLng: mouseClickLocation[1],
+                        }
+                        $.ajax({
+                            type: "POST",
+                            data: locationData
+                        }).done(function(response){
+                                console.log("success");
+                        });
+                    }
+
+                }
+            }
+        </script>
+        <link rel="icon" href="data:,">
+    </head>
+
+    <body style='border:0; margin: 0; width: 100%; height:100%;'>
+        <div id='map' style='width: 100%; height:100%;'></div>
+    </body>
+</html>
