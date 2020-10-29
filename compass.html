@@ -39,11 +39,10 @@
                     const t2 = Math.cos(current[0]) * Math.sin(destination[0]);
                     const t3 = Math.sin(current[0]) * Math.cos(destination[0]) * Math.cos(diffLng);
                     const angleRadians = Math.atan2(t1, (t2 - t3));
-                    console.log(t2)
                     return (angleRadians * 180 / Math.PI); // 
                 }
                 updateLocation();
-                var setLocationInterval = window.setInterval(updateLocation, 2000); // updates location every 2 seconds
+                var setLocationInterval = window.setInterval(updateLocation, 1000); // updates location every 2 seconds
                 
                 function updateLocation() {
                     //if (current != undefined && destination != undefined)
@@ -59,8 +58,6 @@
                             const current = [parseFloat(parsedResp.currentLat), parseFloat(parsedResp.currentLng)];
                             const destination = [parseFloat(parsedResp.destLat), parseFloat(parsedResp.destLng)];
                             angle = calculateAngle(current, destination);
-                            console.log(current);
-                            console.log(destination);
                             console.log(angle);
                             $('.compass').css('transform', 'rotate(' + (angle-90) + 'deg)'); // angle - 90 to make it point up when angle=0
                         }
@@ -69,6 +66,7 @@
             }
         </script>
         <link rel="icon" href="data:,">
+        <title>Compass</title>
     </head>
     <body>
         <div class="blackCircle center">

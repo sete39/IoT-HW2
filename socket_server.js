@@ -4,32 +4,6 @@ const net = require('net');
 var fs = require('fs');
 var locations = {}; // current latitude, current longitude, destination latitude, destination longitude
 
-// function parsePOSTRequest(req, nParams) { // returns the request's body as a JSON
-//     const bodyIndex = r.indexOf("\n\r");
-//     const reqBody = r.substring(bodyIndex+3, r.length);
-//     let keyIndex = 0;
-//     let equalIndex = 0;
-//     let ampersandIndex = 0;
-//     let parsedRespJSON = {};
-//     for(i = 0; i < nParams; i++) {
-//         equalIndex = reqBody.indexOf('=', equalIndex+1);
-//         let key = reqBody.substring(keyIndex, equalIndex);
-//         let value;
-//         if (i == (nParams-1)) {
-//             // take from last '=' character till end of string if last one, do not use ampersand index
-//             value = reqBody.substring(equalIndex+1, req.length)
-//         }
-//         else {
-//             key = reqBody.substring(keyIndex, equalIndex) // bet. prev ampersand and equal we have the key
-//             ampersandIndex = reqBody.indexOf('&', ampersandIndex+1);
-//             keyIndex = ampersandIndex + 1;
-//             value = reqBody.substring(equalIndex+1, ampersandIndex) // bet. equal and ampersand we have value
-//         }
-//         parsedRespJSON[key] = value;
-//     }
-//     return parsedRespJSON;
-// }
-
 function parsePOSTRequest(req) { // returns the request's body as a JSON
     const bodyIndex = r.indexOf("\n\r");
     const reqBody = r.substring(bodyIndex+3, r.length);
@@ -59,7 +33,6 @@ function parsePOSTRequest(req) { // returns the request's body as a JSON
 }
 
 var server = net.createServer(function(socket) {
-    var currentLocation, destinationLocation; // latitude and longitude of both locations
     socket.on('data', function(data) {
         //console.log('Received: ' + data);
         r = data.toString();
